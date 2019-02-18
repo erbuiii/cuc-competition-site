@@ -6,6 +6,20 @@
   display: flex;
   align-items: center;
 }
+.flex-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.col {
+  flex-direction: column;
+}
+
+.width_1000 {
+  width: 1000px;
+}
 .el-menu--horizontal > .el-menu-item,
 .el-menu--horizontal > .el-submenu .el-submenu__title {
   height: 40px;

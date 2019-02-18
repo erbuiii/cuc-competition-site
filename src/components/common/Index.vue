@@ -2,6 +2,15 @@
 	<div>
 		<v-header></v-header>
 		<navbar></navbar>
+    <div class="content-wrapper">
+      <div class="content">
+				<transition name="move" mode="out-in">
+					<keep-alive>
+						<router-view></router-view>
+					</keep-alive>
+				</transition>
+			</div>
+    </div>
 		<v-footer></v-footer>
 	</div>
 </template>
