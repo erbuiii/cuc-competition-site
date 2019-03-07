@@ -24,24 +24,16 @@ const login = {
 
   },
   actions: {
-    setUserName({
-      commit
-    }, user) {
+    setUserName({ commit }, user) {
       commit("SET_USERNAME", user)
     },
-    setRole({
-      commit
-    }, user) {
+    setRole({ commit }, user) {
       commit("SET_ROLE", user)
     },
-    setNewRouter({
-      commit
-    }, user) {
+    setNewRouter({ commit }, user) {
       commit("SET_NEWROUTER", user)
     },
-    logOut({
-      commit
-    }, user) {
+    logOut({ commit }, user) {
       commit("SET_USERNAME", user)
     }
   }

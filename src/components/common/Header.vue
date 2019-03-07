@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper flex-center">
-    <div class="width_1000 flexbox">
+    <div class="width_1000 flex-row">
       <div class="logo"></div>
       <h2 class="title">学科竞赛管理系统</h2>
     </div>

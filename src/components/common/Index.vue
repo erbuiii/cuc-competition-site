@@ -2,8 +2,8 @@
 	<div>
 		<v-header></v-header>
 		<navbar></navbar>
-    <div class="content-wrapper">
-      <div class="content">
+    <div class="content-wrapper flex-col">
+      <div class="content width_1000">
 				<transition name="move" mode="out-in">
 					<keep-alive>
 						<router-view></router-view>

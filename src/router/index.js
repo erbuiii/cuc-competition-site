@@ -4,6 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
+  // mode: 'history',
   routes: [{
       path: '/',
       redirect: '/home'
@@ -11,12 +12,21 @@ export default new Router({
     {
       path: '/login',
       component: resolve => require(['../components/views/Login.vue'], resolve)
+    },
+    {
+      path: '/awardRecords/details',
+      name: 'AwardRecordsDetail',
+      component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve),
+      meta: {
+        index: 'awardRecordsDetail',
+        role: 'admin',
+        title: '获奖详情'
+      },
     }
   ]
 })
 
 export const powerRouter = [ 
-  // mode: 'history',
   {
     path: '/',
     name: 'Index',
@@ -48,9 +58,32 @@ export const powerRouter = [
         component: resolve => require(['../components/views/CompetitionInfo.vue'], resolve),
         meta: {
           index: 'competition-info',
-          role: 'teacher',
+          role: 'admin',
           title: '竞赛信息'
         }
+      },
+      {
+        path: '/guidance',
+        name: 'Guidance',
+        component: resolve => require(['../components/views/Guidance.vue'], resolve),
+        meta: {
+          index: 'guidance',
+          role: 'admin',
+          title: '指南流程'
+        }
+      },
+      {
+        path: '/awardRecords',
+        name: 'AwardRecords',
+        component: resolve => require(['../components/views/AwardRecords.vue'], resolve),
+        meta: {
+          index: 'awardRecords',
+          role: 'admin',
+          title: '获奖查询'
+        },
+        children: [
+          
+        ]
       },
     ]
   },

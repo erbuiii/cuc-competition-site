@@ -1,5 +1,3 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
 import router from './router'
@@ -10,26 +8,10 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
 import '@/assets/css/main.css'
-// import {
-//   Button,
-// 	Menu,
-// 	MenuItem,
-//   Submenu,
-//   Form,
-//   FormItem,
-//   Input
-// } from 'element-ui'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
-// Vue.use(Button)
-// Vue.use(Menu)
-// Vue.use(MenuItem)
-// Vue.use(Submenu)
-// Vue.use(Form)
-// Vue.use(FormItem)
-// Vue.use(Input)
 
 axios.defaults.baseURL = 'https://easy-mock.com/mock/5c24d20b9a96a934e48de3df/mis'
 
@@ -42,9 +24,10 @@ router.beforeEach((to, from, next) => {
     } else {
       let newrouter
       console.log(store.getters.role);
-      if (store.getters.role == 'teacher') { //判断权限
+      if (store.getters.role == 'admin') { //判断权限
+        console.log('powerRouter ', powerRouter)
         newrouter = powerRouter
-        console.log("teacher role")
+        console.log("admin role")
       } else {
         let newchildren = powerRouter[0].children.filter(route => {
           if (route.meta) {

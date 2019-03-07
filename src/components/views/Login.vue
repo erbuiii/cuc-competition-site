@@ -51,15 +51,15 @@ export default {
         UserName: ruleForm.username,
         Password: ruleForm.password
       };
-      axios.post("/Login", formData).then(res => {
-        console.log(res);
+      // axios.post("/Login", formData).then(res => {
+        // console.log(res);
         var res = {
           data: {
             num: "2015",
             password: "1",
             permissionId: "1",
             result: "1",
-            role: "student",
+            role: "admin",
             sid: "1",
             user_name: "h1"
           }
@@ -77,7 +77,7 @@ export default {
           this.$router.push({ path: "/" });
           console.log(this.$store.getters.role);
         }
-      });
+      // });
     }
   }
 };
