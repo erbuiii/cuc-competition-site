@@ -2,6 +2,8 @@
 const models = require('./db')
 const express = require('express')
 const router = express.Router()
+const jwt = require('jsonwebtoken')
+const path = require('path')
 
 // 创建账号接口
 router.post('/api/login/createAccount', (req, res) => {
@@ -21,7 +23,7 @@ router.post('/api/login/createAccount', (req, res) => {
 })
 
 // 获取已有账号接口
-router.get('api/login/getAccount', (req, res) => {
+router.get('/api/login/getAccount', (req, res) => {
   // 通过模型去查找数据库
   models.Login.find((err, data) => {
     if (err) {

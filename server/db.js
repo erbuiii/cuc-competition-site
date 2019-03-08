@@ -1,7 +1,7 @@
 // 使用mongoose中间件连接mongoDB
 const mongoose = require('mongoose')
 // 连接数据库 如果没有创建 默认数据库会自动生成
-mongoose.connect('mongodb://127.0.0.1:27017/cuc-competition', {useNewUrlParser:true})
+mongoose.connect('mongodb://localhost/cuc-competition', {useNewUrlParser:true})
 
 // 为本次连接绑定事件
 const db = mongoose.connection

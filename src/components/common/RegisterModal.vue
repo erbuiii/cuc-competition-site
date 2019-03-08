@@ -40,7 +40,7 @@ export default {
           account: this.form.name,
           password: this.form.password
         }
-        axios.post('/api/login/getAccount', params).then(res => {
+        axios.post('/api/login/createAccount', params).then(res => {
           console.log(res)
         }).catch(err => {
           console.log(err)
