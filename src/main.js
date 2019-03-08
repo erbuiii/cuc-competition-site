@@ -13,7 +13,7 @@ Vue.config.productionTip = false
 
 Vue.use(ElementUI)
 
-axios.defaults.baseURL = 'https://easy-mock.com/mock/5c24d20b9a96a934e48de3df/mis'
+// axios.defaults.baseURL = 'https://easy-mock.com/mock/5c24d20b9a96a934e48de3df/mis'
 
 router.beforeEach((to, from, next) => {
 

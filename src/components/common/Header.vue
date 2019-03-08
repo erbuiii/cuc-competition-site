@@ -1,15 +1,38 @@
 <template>
   <div class="wrapper flex-center">
-    <div class="width_1000 flex-row">
-      <div class="logo"></div>
-      <h2 class="title">学科竞赛管理系统</h2>
+    <div class="width_1000 flex-row space-between">
+      <div class="flex-row">
+        <div class="logo"></div>
+        <h2 class="title">学科竞赛管理系统</h2>
+      </div>
+      <div class="login-btn flex-center" @click="register">注册</div>
     </div>
+    <register-modal :visibleVal="regisModalConfig.visible" @invisible="closeRegisModal"></register-modal>
   </div>
 </template>
 
 <script>
+import axios from "axios"
+import RegisterModal from './RegisterModal';
 export default {
-
+  data() {
+    return {
+      regisModalConfig: {
+        visible: false
+      }
+    }
+  },
+  methods: {
+    register() {
+      this.regisModalConfig.visible = true
+    },
+    closeRegisModal(childVal) {
+      this.regisModalConfig.visible = childVal
+    }
+  },
+  components: {
+    RegisterModal
+  }
 }
 </script>
 
@@ -31,5 +54,13 @@ export default {
   width: 288px;
   height: 63px;
   background: url('../../assets/imgs/logo-top.png') no-repeat;
+}
+.login-btn {
+  width: 68px;
+  height: 30px;
+  border: 1px solid #fff;
+  border-radius: 15px;
+  color: #fff;
+  font-size: 16px;
 }
 </style>
