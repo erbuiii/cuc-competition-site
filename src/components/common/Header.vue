@@ -5,7 +5,8 @@
         <div class="logo"></div>
         <h2 class="title">学科竞赛管理系统</h2>
       </div>
-      <div class="login-btn flex-center" @click="register">注册</div>
+      <!-- <div class="login-btn flex-center" @click="register">注册</div> -->
+      <div class="login-btn flex-center" @click="goToLogin">登录</div>
     </div>
     <register-modal :visibleVal="regisModalConfig.visible" @invisible="closeRegisModal"></register-modal>
   </div>
@@ -23,6 +24,9 @@ export default {
     }
   },
   methods: {
+    goToLogin() {
+      this.$router.push('/login')
+    },
     register() {
       this.regisModalConfig.visible = true
     },

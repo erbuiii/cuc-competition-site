@@ -35,12 +35,12 @@ export default {
   methods: {
     register(type) {
       if (type == 'confirm') {
-        // console.log(this.form.name, this.form.password)
         let params = {
-          account: this.form.name,
+          name: this.form.name,
           password: this.form.password
         }
-        axios.post('/api/login/createAccount', params).then(res => {
+        // axios.post('/api/login/createAccount', params).then(res => {
+        axios.post('/api/admin/login', params).then(res => {
           console.log(res)
         }).catch(err => {
           console.log(err)
