@@ -36,7 +36,7 @@ router.get('/api/login/getAccount', (req, res) => {
 
 // 登录
 router.post('/api/admin/login', (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   models.User.find({ name: req.body.name }, (err, docs) => {
     if (err) {
       res.send(err)

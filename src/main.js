@@ -18,7 +18,7 @@ Vue.use(ElementUI)
 router.beforeEach((to, from, next) => {
 
   if (store.getters.role) { //判断role 是否存在
-    console.log('role存在');
+    console.log('role存在: ', store.getters.role);
     if (store.getters.newRouter.length !== 0) {
       next();
     } else {

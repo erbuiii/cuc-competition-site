@@ -12,16 +12,6 @@ export default new Router({
     {
       path: '/login',
       component: resolve => require(['../components/views/Login.vue'], resolve)
-    },
-    {
-      path: '/awardRecords/details',
-      name: 'AwardRecordsDetail',
-      component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve),
-      meta: {
-        index: 'awardRecordsDetail',
-        role: 'admin',
-        title: '获奖详情'
-      },
     }
   ]
 })

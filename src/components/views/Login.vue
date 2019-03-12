@@ -44,8 +44,12 @@ export default {
       }
     };
   },
+  created() {
+    // 清空权限路由信息
+    this.$store.dispatch('setNewRouter', [])
+    console.log(this.$store.getters.newRouter)
+  },
   methods: {
-    // 用户名不存在是2密码错误是0完全正确是1
     getRole() {
       console.log(this.role);
     },
@@ -57,25 +61,19 @@ export default {
       };
       axios.post('/api/admin/login', formData).then(res => {
         let data = res.data
-        let { role,token,user_name } = data.data
-
         if (data.status === 0) {
-            console.log("role: ", role)
-            //更改用户登录状态
-            this.$store.dispatch("setUserName", user_name)
-            // 将用户名和role存进store
-            this.$store.dispatch("setRole", role)
-            this.$router.push({ path: "/" })
-            console.log(this.$store.getters.role)
+          let { role,token,user_name } = data.data
+          //更改用户登录状态
+          // 将用户名和role存进store
+          this.$store.dispatch("setUserName", user_name)
+          this.$store.dispatch("setRole", role)
+          this.$router.push({ path: "/" })
         } else {
           alert(data.msg)
         }
       }).catch(err => {
         console.log(err)
       })
-      // axios.post("/Login", formData).then(res => {
-        // console.log(res);
-      // });
     }
   }
 };
