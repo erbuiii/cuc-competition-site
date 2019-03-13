@@ -38,10 +38,26 @@ const userSchema = mongoose.Schema({
   }
 }, {collection: 'users'})
 
+// 学生注册信息
+const studenInfoSchema = mongoose.Schema({
+  stu_name: String,
+  sex: String,
+  department: String,
+  institute: String,
+  specialty: String,
+  student_id: {
+    type: String,
+    unique: true,
+    require: true
+  },
+  contact_info: String
+}, {collection: 'students_info'})
+
 // 定义模型model
 const Models = {
   Login: mongoose.model('Login', loginSchema),
-  User: mongoose.model('User', userSchema)
+  User: mongoose.model('User', userSchema),
+  StudentInfo: mongoose.model('StudentInfo', studenInfoSchema)
 }
 
 module.exports = Models

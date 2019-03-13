@@ -28,7 +28,7 @@
 import axios from "axios"
 import RegisterModal from './RegisterModal'
 import { powerRouter } from '../../router'
-import { cloneObject } from '../../../utils'
+import { cloneObject, navToPath } from '../../../utils'
 export default {
   data() {
     return {
@@ -56,9 +56,10 @@ export default {
      * 用户名下拉菜单 点击事件
      */
     handleCommand(command) {
-      // this.$message('click on item ' + command);
       switch (command) {
         case '1':
+          this.$router.push('/student/register')
+          // navToPath('/student/register')
           break;
         case '2':
           break;
@@ -71,7 +72,6 @@ export default {
      * 退出登录
      */
     logOut() {
-      console.log('logout!')
       this.loginStatus = false
       // 清除登录状态（游客）
       this.$store.dispatch("setUserName", '')

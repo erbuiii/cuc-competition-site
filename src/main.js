@@ -4,6 +4,7 @@ import router from './router'
 import { powerRouter } from './router'
 import store from './store'
 import axios from 'axios'
+import VueAxios from 'vue-axios'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
@@ -12,6 +13,7 @@ import '@/assets/css/main.css'
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+Vue.use(VueAxios, axios)
 
 // axios.defaults.baseURL = 'https://easy-mock.com/mock/5c24d20b9a96a934e48de3df/mis'
 

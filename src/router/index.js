@@ -5,7 +5,8 @@ Vue.use(Router)
 
 export default new Router({
   // mode: 'history',
-  routes: [{
+  routes: [
+    {
       path: '/',
       redirect: '/home'
     },
@@ -80,5 +81,9 @@ export const powerRouter = [
   {
     path: '/login',
     component: resolve => require(['../components/views/Login.vue'], resolve)
+  },
+  {
+    path: '/student/register',
+    component: resolve => require(['../components/views/StuRegister.vue'], resolve)
   }
 ]

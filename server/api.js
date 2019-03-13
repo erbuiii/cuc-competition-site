@@ -116,4 +116,58 @@ router.post('/api/admin/logout', (req, res) => {
     }
   })
 })
+
+// 学生信息注册 -- 新建
+router.post('/api/student/register', (req, res) => {
+  // let data = req.body
+  let { stu_name,sex,department,institute,specialty,student_id,contact_info } = req.body
+  let stuInfo = {
+    stu_name: stu_name,
+    sex: sex,
+    department: department,
+    institute: institute,
+    specialty: specialty,
+    student_id: student_id,
+    contact_info: contact_info
+  }
+  
+  models.StudentInfo.updateOne({ student_id: student_id }, { $set: stuInfo }, { upsert:true }, (err, res) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    } 
+  })
+
+  res.send({ 'status': 0, 'msg': '注册成功！' })
+})
+
+// 学生信息注册 -- 显示
+router.get('/api/student/showinfo/:id', (req, res) => {
+  models.StudentInfo.find({ student_id: req.params.id }, (err, docs) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+    if (docs.length) {
+      let stuInfo = docs[0]
+      res.send({ 
+        'status': 0, 
+        'msg': '',
+        'data': {
+          'regis_status': 1,
+          'stu_name': stuInfo.stu_name,
+          'sex': stuInfo.sex,
+          'department': stuInfo.department,
+          'institute': stuInfo.institute,
+          'specialty': stuInfo.specialty,
+          'student_id': stuInfo.student_id,
+          'contact_info': stuInfo.contact_info
+        }
+      })
+    } else {
+      res.send({ 'status': -1, 'msg': '该学生还未注册', 'data': { 'regis_status': 0 } })
+    }
+  })
+})
 module.exports = router
