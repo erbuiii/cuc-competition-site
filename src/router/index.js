@@ -49,7 +49,7 @@ export const powerRouter = [
         component: resolve => require(['../components/views/CompetitionInfo.vue'], resolve),
         meta: {
           index: 'competition-info',
-          role: 'admin',
+          role: 'student',
           title: '竞赛信息'
         }
       },
@@ -70,7 +70,7 @@ export const powerRouter = [
         meta: {
           index: 'awardRecords',
           role: 'admin',
-          title: '获奖查询'
+          title: '获奖信息'
         },
         children: [
           
@@ -85,5 +85,9 @@ export const powerRouter = [
   {
     path: '/student/register',
     component: resolve => require(['../components/views/StuRegister.vue'], resolve)
-  }
+  },
+  {
+    path: '/awardRecords/details',
+    component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve)
+  },
 ]

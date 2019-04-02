@@ -170,4 +170,105 @@ router.get('/api/student/showinfo/:id', (req, res) => {
     }
   })
 })
+
+// 竞赛信息
+router.get('/api/competition/info', (req, res) => {
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize            // 实现分割查询的skip
+  let compInfoModel = models.CompInfo.find({}).skip(skip).limit(pageSize)
+  compInfoModel.exec((err, data) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+
+    // 获取数据总长度
+    models.CompInfo.find({}, (err, docs) => {
+      if (err) {
+        res.send(err)
+        return
+      }
+
+      let total = docs.length
+      if (total) {
+        res.send({ 
+          'status': 0, 
+          'msg': '',
+          'data': {
+            list: data,
+            total: total
+          }
+        })
+      } else {
+        res.send({ 'status': -1, 'msg': '竞赛信息列表为空！'})
+      }
+    }) 
+  })
+})
+router.post('/api/competition/info/add', (req, res) => {
+  // let data = req.body
+  let { comp_name,organizer,level,status } = req.body
+  let newCompInfo = new models.CompInfo({
+    comp_name: comp_name,
+    organizer: organizer,
+    level: level,
+    status: status,
+  })
+  
+  newCompInfo.save((err) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    } else {
+      res.send({ 'status': 0, 'msg': '保存成功' })
+    }
+  })
+})
+router.post('/api/competition/info/delete', (req, res) => {
+  models.CompInfo.remove({ _id: req.body._id }, (err) => {
+    if (err) {
+        res.status(500).send()
+        return
+    }
+    res.send({ 'status': 0, 'msg': '删除成功' })
+  })
+})
+
+// 获奖信息
+router.get('/api/awards', (req, res, next) => {
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize               // 实现分割查询的skip
+  let awardRecordModel = models.AwardRecord.find({}).skip(skip).limit(pageSize)
+  awardRecordModel.exec((err, data) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+
+    // 获取数据总长度
+    models.AwardRecord.find({}, (err, docs) => {
+      if (err) {
+        res.send(err)
+        return
+      }
+
+      let total = docs.length
+      if (total) {
+        res.send({ 
+          'status': 0, 
+          'msg': '',
+          'data': {
+            list: data,
+            total: total
+          }
+        })
+      } else {
+        res.send({ 'status': -1, 'msg': '获奖信息列表为空！'})
+      }
+    }) 
+  })
+})
 module.exports = router

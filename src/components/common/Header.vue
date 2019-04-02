@@ -12,7 +12,7 @@
             {{username}}<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="1">学生注册</el-dropdown-item>
+            <el-dropdown-item v-if="role === 'student'" command="1">学生注册</el-dropdown-item>
             <el-dropdown-item command="2">消息</el-dropdown-item>
             <el-dropdown-item command="3" divided>退出登录</el-dropdown-item>
           </el-dropdown-menu>
@@ -36,12 +36,15 @@ export default {
       username: '',
       regisModalConfig: {
         visible: false
-      }
+      },
+      role: ''
     }
   },
   created() {
     this.loginStatus = this.$store.getters.isLogin
     this.username = this.$store.getters.userName
+    this.role = this.$store.getters.role
+    console.log(this.role)
   },
   mounted() {
   },
@@ -72,6 +75,7 @@ export default {
      * 退出登录
      */
     logOut() {
+      console.log('logout')
       this.loginStatus = false
       // 清除登录状态（游客）
       this.$store.dispatch("setUserName", '')
@@ -79,6 +83,7 @@ export default {
 
       // 游客路由
       let powerRouterCopy = cloneObject(powerRouter)
+      console.log('after clone:', powerRouter)
       let newchildren = powerRouterCopy[0].children.filter(route => {
         if (route.meta) {
           if (route.meta.role == this.$store.getters.role) {

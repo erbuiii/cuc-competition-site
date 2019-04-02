@@ -33,8 +33,8 @@ export default {
   data: function() {
     return {
       loginForm: {
-        username: '',
-        password: ''
+        username: 'erbuiii',
+        password: 'qwertyuiop'
       },
       rules: {
         username: [
@@ -69,7 +69,7 @@ export default {
           this.$store.dispatch("setRole", role)
           this.$router.push({ path: "/" })
         } else {
-          alert(data.msg)
+          this.$message(data.msg)
         }
       }).catch(err => {
         console.log(err)

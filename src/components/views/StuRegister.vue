@@ -153,7 +153,7 @@ export default {
           alert(res.msg)
         }
       }).catch(err => {
-        alert(err)
+        console.log(err)
       })
     }
   }

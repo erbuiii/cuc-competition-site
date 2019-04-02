@@ -53,11 +53,35 @@ const studenInfoSchema = mongoose.Schema({
   contact_info: String
 }, {collection: 'students_info'})
 
+// 竞赛信息
+const compInfoSchema = mongoose.Schema({
+  comp_name: String,
+  organizer: String,
+  level: String,
+  status: Number
+}, {collection: 'competitions_info'})
+
+const awardRecordSchema = mongoose.Schema({
+  department: String,
+  institute: String,
+  comp_name: String,
+  award_time: String,
+  stu_name: String,
+  specialty: String,
+  grade: String,
+  guide_teacher: String,
+  award_name: String,
+  level: String,
+  organizer: String,
+}, {collection: 'awards_record'})
+
 // 定义模型model
 const Models = {
   Login: mongoose.model('Login', loginSchema),
   User: mongoose.model('User', userSchema),
-  StudentInfo: mongoose.model('StudentInfo', studenInfoSchema)
+  StudentInfo: mongoose.model('StudentInfo', studenInfoSchema),
+  CompInfo: mongoose.model('CompInfo', compInfoSchema),
+  AwardRecord: mongoose.model('AwardRecord', awardRecordSchema)
 }
 
 module.exports = Models
