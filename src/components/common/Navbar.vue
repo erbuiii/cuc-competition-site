@@ -66,7 +66,8 @@ export default {
 
 <style scoped>
 .nav-wrapper {
-  border-bottom: solid 1px #e6e6e6;
+  width: 100%;
+  box-shadow: 0 4px 5px -3px #eee; 
 }
 </style>
 <style>

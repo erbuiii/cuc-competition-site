@@ -53,6 +53,13 @@ const studenInfoSchema = mongoose.Schema({
   contact_info: String
 }, {collection: 'students_info'})
 
+// 新闻
+const newsSchema = mongoose.Schema({
+  title: String,
+  create_date: String,
+  content: String
+}, {collection: 'news'})
+
 // 竞赛信息
 const compInfoSchema = mongoose.Schema({
   comp_name: String,
@@ -80,6 +87,7 @@ const Models = {
   Login: mongoose.model('Login', loginSchema),
   User: mongoose.model('User', userSchema),
   StudentInfo: mongoose.model('StudentInfo', studenInfoSchema),
+  News: mongoose.model('News', newsSchema),
   CompInfo: mongoose.model('CompInfo', compInfoSchema),
   AwardRecord: mongoose.model('AwardRecord', awardRecordSchema)
 }

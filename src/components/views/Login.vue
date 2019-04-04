@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="login-wrapper flex-center">
     <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="0px" class="ms-content">
       <!-- <el-form-item prop="username"> -->
       <el-form-item>
@@ -33,8 +33,8 @@ export default {
   data: function() {
     return {
       loginForm: {
-        username: 'erbuiii',
-        password: 'qwertyuiop'
+        username: 'admin',
+        password: '123456'
       },
       rules: {
         username: [
@@ -80,12 +80,9 @@ export default {
 </script>
 
 <style scoped>
-.login-wrap {
-  position: relative;
+.login-wrapper {
   width: 100%;
-  height: 100%;
-  background: url('../../assets/imgs/login-bg.jpg') no-repeat;
-  background-size: 100%;
+  height: 100vh;
 }
 .ms-title {
   width: 100%;
@@ -106,6 +103,7 @@ export default {
   overflow: hidden;
 }
 .ms-content {
+  width: 500px;
   padding: 30px 30px;
 }
 .login-btn {

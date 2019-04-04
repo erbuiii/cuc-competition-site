@@ -87,6 +87,16 @@ export const powerRouter = [
     component: resolve => require(['../components/views/StuRegister.vue'], resolve)
   },
   {
+    path: '/news/detail',
+    name: 'NewsDetail',
+    component: resolve => require(['../components/views/NewsDetail.vue'], resolve),
+    meta: {
+      index: 'news-detail',
+      role: 'student',
+      title: '公告详情'
+    }
+  },
+  {
     path: '/awardRecords/details',
     component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve)
   },

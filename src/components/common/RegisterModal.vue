@@ -39,13 +39,14 @@ export default {
           name: this.form.name,
           password: this.form.password
         }
-        // axios.post('/api/login/createAccount', params).then(res => {
-        axios.post('/api/admin/login', params).then(res => {
-          console.log(res)
+        axios.post('/api/login/createAccount', params).then(res => {
+          if (res.data.status == 0) {
+            console.log(res.data)
+            this.$message(res.data.msg)
+          }
         }).catch(err => {
           console.log(err)
         })
-        return;
         this.$emit('invisible', false)
       } else {
         this.$emit('invisible', false)        

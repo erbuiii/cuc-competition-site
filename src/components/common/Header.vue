@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper flex-center">
+  <div class="header-wrapper flex-center">
     <div class="width_1000 flex-row space-between">
       <div class="flex-row">
         <div class="logo"></div>
@@ -12,13 +12,16 @@
             {{username}}<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item v-if="role === 'student'" command="1">学生注册</el-dropdown-item>
+            <el-dropdown-item v-if="role === 'student'" command="1">学生信息</el-dropdown-item>
             <el-dropdown-item command="2">消息</el-dropdown-item>
             <el-dropdown-item command="3" divided>退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
-      <div v-else class="login-btn flex-center" @click="goToLogin">登录</div>
+      <div v-else class="flex-row">
+        <div class="login-btn flex-center" @click="goToLogin">登录</div>
+        <div class="login-btn flex-center" @click="register">学生注册</div>
+      </div>
     </div>
     <register-modal :visibleVal="regisModalConfig.visible" @invisible="closeRegisModal"></register-modal>
   </div>
@@ -117,31 +120,36 @@ export default {
 </script>
 
 <style scoped>
-.wrapper {
-  height: 150px;
+.header-wrapper {
+  width: 100%;
+  height: 140px;
   padding: 0 20px;
   background: #667db6;  /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6);  /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
-.wrapper .title {
+.header-wrapper .title {
   padding-left: 10px;
   color: #fff;
   font-weight: 400;
   letter-spacing: 1px;
 }
-.wrapper .logo {
+.header-wrapper .logo {
   width: 288px;
   height: 63px;
   background: url('../../assets/imgs/logo-top.png') no-repeat;
 }
 .login-btn {
-  width: 68px;
+  margin: 0 4px;
+  padding: 0 14px;
   height: 30px;
   border: 1px solid #fff;
   border-radius: 15px;
   color: #fff;
   font-size: 16px;
+}
+.login-btn:hover {
+  cursor: pointer;
 }
 .el-dropdown-link {
   cursor: pointer;

@@ -7,9 +7,10 @@ const path = require('path')
 
 // 创建账号接口
 router.post('/api/login/createAccount', (req, res) => {
-  let newAccount = new models.Login({
-    account: req.body.account,
-    password: req.body.password
+  let newAccount = new models.User({
+    name: req.body.name,
+    password: req.body.password,
+    role: 'student'
   })
 
   //保存newAccount数据进MongoDB
@@ -17,7 +18,7 @@ router.post('/api/login/createAccount', (req, res) => {
     if (err) {
       res.send(err)
     } else {
-      res.send('create account succeed')
+      res.send({ 'status': 0, 'msg': 'create account succeed' })
     }
   })
 })
@@ -271,4 +272,83 @@ router.get('/api/awards', (req, res, next) => {
     }) 
   })
 })
+
+// 新闻公告
+router.get('/api/news', (req, res) => {
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize            // 实现分割查询的skip
+  let newsModel = models.News.find({}).skip(skip).limit(pageSize)
+  newsModel.exec((err, data) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+
+    // 获取数据总长度
+    models.News.find({}, (err, docs) => {
+      if (err) {
+        res.send(err)
+        return
+      }
+
+      let total = docs.length
+      if (total) {
+        res.send({ 
+          'status': 0, 
+          'msg': '',
+          'data': {
+            list: data,
+            total: total
+          }
+        })
+      } else {
+        res.send({ 'status': -1, 'msg': '竞赛信息列表为空！'})
+      }
+    }) 
+  })
+})
+router.post('/api/news/add', (req, res) => {
+  let { title, create_date, content } = req.body
+  let news = new models.News({
+    title: title,
+    create_date: create_date,
+    content: content,
+  })
+  
+  news.save((err) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    } else {
+      res.send({ 'status': 0, 'msg': '创建成功' })
+    }
+  })
+})
+router.post('/api/news/delete', (req, res) => {
+  models.News.remove({ _id: req.body._id }, (err) => {
+    if (err) {
+        res.status(500).send()
+        return
+    }
+    res.send({ 'status': 0, 'msg': '删除成功' })
+  })
+})
+router.post('/api/news/edit', (req, res) => {
+  let { _id, title, create_date, content } = req.body
+  let news = {
+    title: title,
+    create_date: create_date,
+    content: content
+  }
+  models.News.updateOne({ _id: _id }, { $set: news }, { upsert:true }, (err, res) => {
+    if (err) {
+      res.status(500).send()
+      return
+    } 
+    res.send({ 'status': 0, 'msg': '编辑成功' })    
+  })
+})
+
 module.exports = router

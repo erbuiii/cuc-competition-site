@@ -10,6 +10,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
 import '@/assets/css/main.css'
+import { cloneObject } from '../utils/index'
 
 Vue.config.productionTip = false
 
@@ -29,7 +30,7 @@ router.beforeEach((to, from, next) => {
       let newrouter
       console.log(store.getters.role);
       if (store.getters.role == 'admin') { //判断权限
-        console.log('powerRouter ', powerRouter)
+        // console.log('powerRouter ', powerRouter)
         newrouter = powerRouter
         console.log("admin role")
       } else {

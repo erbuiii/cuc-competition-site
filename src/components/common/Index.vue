@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="main-wrapper flex-col">
 		<v-header></v-header>
 		<navbar></navbar>
     <div class="content-wrapper flex-col">
@@ -27,5 +27,12 @@ export default {
 </script>
 
 <style scoped>
-
+.main-wrapper {
+  width: 100vw;
+  min-height: 100vh;
+}
+.content-wrapper {
+  flex: 1;
+  padding: 18px 0;
+}
 </style>

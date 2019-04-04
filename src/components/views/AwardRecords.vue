@@ -140,7 +140,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .toolbar {
   padding: 10px 0;
 }
