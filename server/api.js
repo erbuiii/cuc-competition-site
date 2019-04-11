@@ -207,6 +207,45 @@ router.get('/api/competition/info', (req, res) => {
     }) 
   })
 })
+router.get('/api/competition/query', (req, res) => {
+  const { keyword } = req.query
+  const reg = new RegExp(keyword, 'i')  //不区分大小写
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize
+  let compQueryModel = models.CompInfo.find(
+    {
+      $or: [
+        {title: { $regex: reg }}
+      ]
+    }
+  )
+  compQueryModel.exec((err, docs) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+    let total = docs.length
+    if (total) {
+      compQueryModel.skip(skip).limit(pageSize).exec((err, data) => {
+        if (err) {
+          res.send(err)
+          return
+        }
+        res.send({ 
+          'status': 0, 
+          'msg': '', 
+          'data': {
+            list: data,
+            total: total
+          } 
+        })
+      })
+    } else {
+      res.send({ 'status': -1, 'msg': '没有符合条件的记录' })      
+    }
+  })
+})
 router.post('/api/competition/info/add', (req, res) => {
   // let data = req.body
   let { comp_name,organizer,level,status } = req.body
@@ -270,6 +309,55 @@ router.get('/api/awards', (req, res, next) => {
         res.send({ 'status': -1, 'msg': '获奖信息列表为空！'})
       }
     }) 
+  })
+})
+router.get('/api/awards/query', (req, res) => {
+  const { keyword } = req.query
+  const reg = new RegExp(keyword, 'i')  //不区分大小写
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize
+  let awardQueryModel = models.AwardRecord.find(
+    {
+      $or: [
+        {department: { $regex: reg }},
+        {institute: { $regex: reg }},
+        {comp_name: { $regex: reg }},
+        {award_time: { $regex: reg }},
+        {stu_name: { $regex: reg }},
+        {specialty: { $regex: reg }},
+        {grade: { $regex: reg }},
+        {guide_teacher: { $regex: reg }},
+        {award_name: { $regex: reg }},
+        {level: { $regex: reg }},
+        {organizer: { $regex: reg }}
+      ]
+    }
+  )
+  awardQueryModel.exec((err, docs) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+    let total = docs.length
+    if (total) {
+      awardQueryModel.skip(skip).limit(pageSize).exec((err, data) => {
+        if (err) {
+          res.send(err)
+          return
+        }
+        res.send({ 
+          'status': 0, 
+          'msg': '', 
+          'data': {
+            list: data,
+            total: total
+          } 
+        })
+      })
+    } else {
+      res.send({ 'status': -1, 'msg': '没有符合条件的记录' })      
+    }
   })
 })
 

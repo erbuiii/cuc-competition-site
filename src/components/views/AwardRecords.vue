@@ -1,10 +1,21 @@
 <template>
   <div>
-    <div class="toolbar">
-      <el-button type="primary" round icon="el-icon-download" size="mini" @click="exportExcel">导出</el-button>
+    <div class="toolbar clearfix">
+      <el-col :span="1">
+        <el-button type="primary" icon="el-icon-refresh" size="mini" circle plain @click="refresh"></el-button>
+      </el-col>
+      <el-col :span="3">
+        <el-button type="primary" round icon="el-icon-star-on" size="mini" @click="customQuery">自定义查询</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-input size="mini" min="180px" class="search-box" v-model="queryStr" placeholder="回车发起搜索" suffix-icon="el-icon-search"
+          @keyup.enter.native="searchEnter"
+        ></el-input>
+      </el-col>
+      <el-button class="export" type="primary" round icon="el-icon-download" size="mini" @click="exportExcel">导出</el-button>
     </div>
     <div class="table" id="award-table">
-      <el-table :data="awardList" size="small" height="60vh" style="width: 100%;">
+      <el-table :data="awardList" size="small" height="60vh" style="width: 100%;" v-loading="loading">
         <el-table-column type="index" :index="indexMethod"></el-table-column>
         <el-table-column prop="department" label="学部"></el-table-column>
         <el-table-column prop="institute" label="学院"></el-table-column>
@@ -46,10 +57,12 @@ export default {
   data() {
     return {
       role: '',
+      loading: true,
       currentPage: 1,
       totalCount: 0,
       pageSize: 10,
-      awardList: []
+      awardList: [],
+      queryStr: ''
     }
   },
   mounted() {
@@ -64,19 +77,54 @@ export default {
      */
     handleCurrentChange(val) {
       this.currentPage = val
-      this._initData()
+      if (this.queryStr) {
+        this.search()
+      } else {
+        this._initData()
+      }
     },
     /**
      * 初始化数据，获得数据总长度以及每页数据
      */
     _initData() {
-      console.log('initial data')
       this.awardList = []
       let params = {
         currentPage: this.currentPage,
         pageSize: this.pageSize
       }
       this.getAwardRecord(params)
+    },
+    /**
+     * 刷新
+     */
+    refresh() {
+      this._initData()
+      this.queryStr = ''
+    },
+    /**
+     * 处理返回数据
+     */
+    formatList(data) {
+      let dataList = []
+      _.forEach(data, item => {
+        let obj = {}
+        obj.awardId = item._id
+        obj.department = item.department
+        obj.institute = item.institute
+        obj.compName = item.comp_name
+        obj.awardTime = item.award_time
+        obj.stuName = item.stu_name
+        obj.specialty = item.specialty
+        obj.grade = item.grade
+        obj.awardName = item.award_time
+        obj.guideTeacher = item.guide_teacher
+        obj.level = item.level
+        obj.organizer = item.organizer
+        // this.awardList.push(obj)
+        dataList.push(obj)
+        this.awardList = dataList
+        this.loading = false
+      })
     },
     /**
      * 获取获奖信息
@@ -87,24 +135,9 @@ export default {
         if (res.status == 0) {
           let data = res.data.list
           this.totalCount = res.data.total
-          _.forEach(data, item => {
-            let obj = {}
-            obj.awardId = item._id
-            obj.department = item.department
-            obj.institute = item.institute
-            obj.compName = item.comp_name
-            obj.awardTime = item.award_time
-            obj.stuName = item.stu_name
-            obj.specialty = item.specialty
-            obj.grade = item.grade
-            obj.awardName = item.award_time
-            obj.guideTeacher = item.guide_teacher
-            obj.level = item.level
-            obj.organizer = item.organizer
-            this.awardList.push(obj)
-          })
+          this.formatList(data)
         } else {
-          this.$message(res.msg)
+          this.$message.error(res.msg)
         }
       }).catch(err => {
         console.log(err)
@@ -117,6 +150,40 @@ export default {
       //   path: '/awardRecords/details'
       // })
     },
+    /**
+     * 搜索框回车
+     */
+    searchEnter() {
+      this.currentPage = 1
+      this.search()
+    },
+    /**
+     * 查询
+     */
+    search() {
+      let keyword = this.queryStr
+      let params = { 
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        keyword: keyword 
+      }
+      this.axios.get('/api/awards/query', { params: params }).then(response => {
+        let res = response.data
+        // console.log(res)
+        if (res.status === 0) {
+          let data = res.data.list
+          this.totalCount = res.data.total
+          this.awardList = []
+          this.formatList(data)
+        } else {
+          this.$message.error(res.msg)
+        }
+      })
+    },
+    /**
+     * 自定义查询
+     */
+    customQuery() {},
     /**
      * 导出Excel
      */
@@ -141,7 +208,7 @@ export default {
 </script>
 
 <style scoped>
-.toolbar {
-  padding: 10px 0;
+.toolbar .export {
+  float: right;
 }
 </style>

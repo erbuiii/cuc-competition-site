@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="toolbar" v-if="role == 'admin'">
+    <div class="news-toolbar" v-if="role == 'admin'">
       <el-button type="primary" round icon="el-icon-plus" size="mini" @click="showForm()">新增公告</el-button>
     </div>
     <div class="table" id="news-table">
@@ -162,6 +162,9 @@ export default {
 </script>
 
 <style scoped>
+.news-toolbar {
+  padding-top: 10px;
+}
 .operate:hover {
   color: #E95F55;
 }
