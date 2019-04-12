@@ -1,10 +1,18 @@
 <template>
   <div>
-    <div class="toolbar" v-if="role == 'admin'">
-      <el-button type="primary" round icon="el-icon-plus" size="mini" @click="showCompForm()">新增竞赛信息</el-button>
+    <div class="toolbar clearfix">
+      <el-col :span="1">
+        <el-button type="primary" icon="el-icon-refresh" size="mini" circle plain @click="refresh"></el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-input size="mini" min="180px" class="search-box" v-model="queryStr" placeholder="回车发起搜索" suffix-icon="el-icon-search"
+          @keyup.enter.native="searchEnter"
+        ></el-input>
+      </el-col>
+      <el-button v-if="role == 'admin'" class="add-comp" type="primary" round icon="el-icon-plus" size="mini" @click="showCompForm()">新增竞赛信息</el-button>
     </div>
     <div>
-      <el-table :data="compList" size="small" height="60vh" style="width: 100%; max-height: 60vh;">
+      <el-table :data="compList" size="small" height="60vh" style="width: 100%; max-height: 60vh;" v-loading="loading">
         <el-table-column type="index" :index="indexMethod"></el-table-column>
         <el-table-column prop="name" label="竞赛名称" width="280"></el-table-column>
         <el-table-column prop="organizer" label="主办单位"></el-table-column>
@@ -125,6 +133,8 @@ export default {
   data() {
     return {
       role: '',
+      loading: true,
+      queryStr: '',
       currentPage: 1,
       totalCount: 0,
       pageSize: 10,
@@ -171,6 +181,37 @@ export default {
       }
       this.getCompInfoList(params)
     },
+    refresh() {
+      this._initData()
+      this.queryStr = ''
+    },
+    formatList(data) {
+      let dataList = []
+      _.forEach(data, item => {
+        let obj = {}
+        obj._id = item._id
+        obj.name = item.comp_name
+        obj.organizer = item.organizer
+        obj.level = item.level
+        switch (item.status) {
+          case 0:
+            obj.status = '未开始'
+            break;
+          case 1:
+            obj.status = '申报中'
+            break;
+          case 2:
+            obj.status = '进行中'
+            break;
+          case 3:
+            obj.status = '已结束'
+            break;
+        }
+        dataList.push(obj)
+        this.compList = dataList
+        this.loading = false
+      })
+    },
     /**
      * 获取竞赛信息列表
      */
@@ -180,34 +221,37 @@ export default {
         if (res.status == 0) {
           let data = res.data.list
           this.totalCount = res.data.total
-          _.forEach(data, item => {
-            let obj = {}
-            obj._id = item._id
-            obj.name = item.comp_name
-            obj.organizer = item.organizer
-            obj.level = item.level
-            switch (item.status) {
-              case 0:
-                obj.status = '未开始'
-                break;
-              case 1:
-                obj.status = '申报中'
-                break;
-              case 2:
-                obj.status = '进行中'
-                break;
-              case 3:
-                obj.status = '已结束'
-                break;
-            }
-            this.compList.push(obj)
-          })
+          this.formatList(data)
         } else {
           this.$message(res.msg)
         }
       }).catch(err => {
         console.log(err)
       })
+    },
+    search() {
+      let keyword = this.queryStr
+      let params = { 
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        keyword: keyword 
+      }
+      this.axios.get('/api/competition/query', { params: params }).then(response => {
+        let res = response.data
+        // console.log(res)
+        if (res.status === 0) {
+          let data = res.data.list
+          this.totalCount = res.data.total
+          this.awardList = []
+          this.formatList(data)
+        } else {
+          this.$message.error(res.msg)
+        }
+      })
+    },
+    searchEnter() {
+      this.currentPage = 1
+      this.search()
     },
     /**
      * 新增竞赛
@@ -334,7 +378,11 @@ export default {
      */
     handleCurrentChange(val) {
       this.currentPage = val
-      this._initData()
+      if (this.queryStr) {
+        this.search()
+      } else {
+        this._initData()
+      }
     },
     /**
      * 返回索引值
@@ -346,6 +394,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.add-comp {
+  float: right;
+}
 </style>

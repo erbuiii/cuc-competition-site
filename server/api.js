@@ -216,7 +216,8 @@ router.get('/api/competition/query', (req, res) => {
   let compQueryModel = models.CompInfo.find(
     {
       $or: [
-        {title: { $regex: reg }}
+        {comp_name: { $regex: reg }},
+        {organizer: { $regex: reg }}
       ]
     }
   )
