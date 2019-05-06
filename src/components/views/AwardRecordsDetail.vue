@@ -3,11 +3,7 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>获奖详情</span>
-        <!-- <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button> -->
       </div>
-      <!-- <div v-for="o in 4" :key="o" class="text item">
-        {{'列表内容 ' + o }}
-      </div>-->
       <div class="col-sm-4">
         <div class="table-responsive">
           <table class="table">

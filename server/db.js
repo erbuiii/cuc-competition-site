@@ -65,7 +65,10 @@ const compInfoSchema = mongoose.Schema({
   comp_name: String,
   organizer: String,
   level: String,
-  status: Number
+  status: Number,
+  desc: String,
+  img_name: String,
+  join_stu_id: Array
 }, {collection: 'competitions_info'})
 
 const awardRecordSchema = mongoose.Schema({

@@ -4,13 +4,15 @@ const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
 const path = require('path')
+const formidable = require('formidable')
+const fs = require('fs')
 
-// 创建账号接口
-router.post('/api/login/createAccount', (req, res) => {
+// 账号
+router.post('/api/account/add', (req, res) => {
   let newAccount = new models.User({
     name: req.body.name,
     password: req.body.password,
-    role: 'student'
+    role: req.body.role
   })
 
   //保存newAccount数据进MongoDB
@@ -18,20 +20,67 @@ router.post('/api/login/createAccount', (req, res) => {
     if (err) {
       res.send(err)
     } else {
-      res.send({ 'status': 0, 'msg': 'create account succeed' })
+      res.send({ 'status': 0, 'msg': '注册成功' })
     }
   })
 })
+router.post('/api/account/reset', (req, res) => {
+  let { _id, role, resetPass } = req.body
+  let account = { role: role }
+  if (resetPass) {
+    account.password = '123456'
+  }
 
-// 获取已有账号接口
-router.get('/api/login/getAccount', (req, res) => {
-  // 通过模型去查找数据库
-  models.Login.find((err, data) => {
+  models.User.updateOne({ _id: _id }, { $set: account }, { upsert: true }, (err, res) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    } 
+  })
+  res.send({ 'status': 0, 'msg': '重置成功' })
+})
+router.get('/api/account', (req, res) => {
+  let currentPage = parseInt(req.query.currentPage)  // 当前页码
+  let pageSize = parseInt(req.query.pageSize)        // 每页大小
+  let skip = (currentPage - 1) * pageSize            // 实现分割查询的skip
+  let userModel = models.User.find({}).skip(skip).limit(pageSize)
+  userModel.exec((err, data) => {
     if (err) {
       res.send(err)
-    } else {
-      res.send(data)
+      return
     }
+
+    // 获取数据总长度
+    models.User.find({}, (err, docs) => {
+      if (err) {
+        res.send(err)
+        return
+      }
+
+      let total = docs.length
+      if (total) {
+        res.send({ 
+          'status': 0, 
+          'msg': '',
+          'data': {
+            list: data,
+            total: total
+          }
+        })
+      } else {
+        res.send({ 'status': -1, 'msg': '用户列表为空！'})
+      }
+    }) 
+  })
+})
+router.post('/api/account/delete', (req, res) => {
+  models.User.remove({ _id: req.body.id }, (err) => {
+    if (err) {
+        res.status(500).send()
+        return
+    }
+    res.send({ 'status': 0, 'msg': '删除成功' })
   })
 })
 
@@ -249,12 +298,13 @@ router.get('/api/competition/query', (req, res) => {
 })
 router.post('/api/competition/info/add', (req, res) => {
   // let data = req.body
-  let { comp_name,organizer,level,status } = req.body
+  let { comp_name,organizer,level,status,desc } = req.body
   let newCompInfo = new models.CompInfo({
     comp_name: comp_name,
     organizer: organizer,
     level: level,
     status: status,
+    desc: desc,
   })
   
   newCompInfo.save((err) => {
@@ -276,7 +326,42 @@ router.post('/api/competition/info/delete', (req, res) => {
     res.send({ 'status': 0, 'msg': '删除成功' })
   })
 })
-
+router.post('/api/competition/join', (req, res) => {
+  let { stuId, compId } = req.body
+  models.CompInfo
+    .find({ _id: compId })
+    .lean()
+    .exec((err, docs) => {
+      if (err) {
+          res.status(500).send()
+          return
+      }
+      if (docs.length) {
+        docs.join_stu_id.push(stuId)
+        res.send({ 'status': 0, 'msg': '添加成功' })
+      }
+  })
+})
+router.post('/api/competition/info/delete', (req, res) => {
+  let { stuId, compId } = req.body
+  models.CompInfo
+    .find({ _id: compId })
+    .lean()
+    .exec((err, docs) => {
+      if (err) {
+          res.status(500).send()
+          return
+      }
+      if (docs.length) {
+        let arr = docs.join_stu_id
+        let index = arr.indexOf(stuId)
+        if (index > -1) {
+          arr.splice(index, 1)
+          res.send({ 'status': 0, 'msg': '删除成功' })
+        }
+      }
+  })
+})
 // 获奖信息
 router.get('/api/awards', (req, res, next) => {
   let currentPage = parseInt(req.query.currentPage)  // 当前页码
@@ -439,5 +524,37 @@ router.post('/api/news/edit', (req, res) => {
     res.send({ 'status': 0, 'msg': '编辑成功' })    
   })
 })
+
+// 上传图片
+router.post('/api/upload', (req, res, next) => {
+  let form = new formidable.IncomingForm()
+  form.encoding = 'utf-8' // 编码
+  form.keepExtensions = true // 保留扩展名
+  form.uploadDir = path.join(__dirname, '../static/imgs/competition/') //文件存储路径 最后要注意加 '/' 否则会被存在public下
+  form.parse(req, (err, fields ,files) => { // 解析 formData 数据
+    if(err) return next(err) 
+    let { date, comp_name, comp_id } = fields
+    let oldPath = files.file.path //获取文件路径 ~/public/images/<随机生成的文件名>.<扩展名>
+    let originName = files.file.name //前台上传时的文件名 也就是文件原本的名字
+    let imgName = originName.replace(/[^.]+/, comp_name + date) //把扩展名前的文件名给替换掉
+    //为了方便存储 统一将文件名改为 <竞赛名+时间>.jpg
+    let newPath = path.join(path.dirname(oldPath), imgName) 
+    fs.rename(oldPath, newPath, (err) => {
+      if(err) return next(err)
+      models.CompInfo.updateOne({ _id: comp_id }, { $set: { img_name: imgName } }, { upsert: true }, (err) => {
+          if(err) return next(err)
+          res.send({ 
+            'status': 0, 
+            'msg': '上传成功', 
+            'data': {
+              imgName: imgName
+            } 
+          }) 
+        })
+      })
+  })
+})
+
+
 
 module.exports = router

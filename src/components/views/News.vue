@@ -1,11 +1,12 @@
 <template>
+<div>
   <div>
     <div class="news-toolbar" v-if="role == 'admin'">
-      <el-button type="primary" round icon="el-icon-plus" size="mini" @click="showForm()">新增公告</el-button>
+      <el-button type="primary" round icon="el-icon-plus" size="mini" @click="showForm()">新增新闻</el-button>
     </div>
     <div class="table" id="news-table">
-      <el-table :data="newsList" size="small" height="60vh" style="width: 100%;">
-      <!-- <el-table :data="newsList" @row-click="navigateTo('/news/detail')" size="small" height="60vh" style="width: 100%;"> -->
+      <!-- <el-table :data="newsList" size="small" height="60vh" style="width: 100%;"> -->
+      <el-table :data="newsList" @row-click="navigateTo('/news/detail')" size="small" height="60vh" style="width: 100%;">
         <el-table-column prop="title" width="820"></el-table-column>
         <el-table-column prop="createDate" width="100"></el-table-column>
         <el-table-column v-if="role == 'admin'">
@@ -28,7 +29,7 @@
       </el-pagination>
     </div>
 
-    <!-- 新增公告表单 -->
+    <!-- 新增新闻表单 -->
     <el-dialog title="新增竞赛" :visible.sync="formVisible">
       <el-form :model="form">
         <el-form-item label="标题" :label-width="formLabelWidth">
@@ -46,8 +47,9 @@
         <el-button type="primary" @click="addNews">确 定</el-button>
       </div>
     </el-dialog>
-    <router-view/>
   </div>
+  <router-view></router-view>
+</div>
 </template>
 
 <script>
@@ -78,6 +80,7 @@ export default {
     }
   },
   mounted() {
+    this.mainVisible = true
     this.role = this.$store.getters.role
     this._initData()
   },
@@ -133,9 +136,7 @@ export default {
       let { _id } = row
       this.editNews(_id)
     },
-    editNews(id) {
-
-    },
+    editNews(id) {},
     delNews(index, row) {
       let { _id } = row
       this.axios.post('/api/news/delete', {'_id': _id}).then(res => {

@@ -13,6 +13,19 @@
     </div>
     <div>
       <el-table :data="compList" size="small" height="60vh" style="width: 100%; max-height: 60vh;" v-loading="loading">
+        <el-table-column type="expand">
+          <template slot-scope="scope">
+            <el-form size="mini" label-width="100" v-if="scope.row.desc || scope.row.imgName" >
+              <el-form-item label="竞赛详情" v-if="scope.row.desc">
+                <p>{{scope.row.desc}}</p>
+              </el-form-item>
+              <el-form-item label="获奖图片" v-if="scope.row.imgName" >
+                <img :src="imgUrl + scope.row.imgName" class="img" />
+              </el-form-item>
+            </el-form>
+            <p v-else>暂无信息</p>
+          </template>
+        </el-table-column>
         <el-table-column type="index" :index="indexMethod"></el-table-column>
         <el-table-column prop="name" label="竞赛名称" width="280"></el-table-column>
         <el-table-column prop="organizer" label="主办单位"></el-table-column>
@@ -35,11 +48,16 @@
             <el-tag v-else size="small" disable-transitions>{{scope.row.status}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="240px">
           <template slot-scope="scope">
-            <el-button
+            <!-- <el-button
+              v-if="role == 'admin'"
               size="mini"
-              @click="handleEdit(scope.$index, scope.row)">详情</el-button>
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
+            <el-button
+              v-if="role == 'admin' || role == 'teacher'"
+              size="mini"
+              @click="uploadFile(scope.row)">上传获奖附件</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -48,6 +66,7 @@
         </el-table-column>
       </el-table>
     </div>
+    
     <div class="pagination flex-center">
       <el-pagination
         @current-change="handleCurrentChange"
@@ -83,6 +102,14 @@
             <el-option label="进行中" value="2"></el-option>
             <el-option label="已结束" value="3"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="详情" :label-width="formLabelWidth">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 2, maxRows: 10}"
+            placeholder="请输入竞赛详情"
+            v-model="form.desc">
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -120,15 +147,35 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
+        <el-button type='text' @click="navTo('/student/register')">信息更正</el-button>
         <el-button @click="joinFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitJoinForm">确 定</el-button>
+        <el-button type="primary" @click="submitJoinForm(joinForm.compId)">确 定</el-button>
       </div>
+    </el-dialog>
+
+    <!-- 上传获奖图片 -->
+    <el-dialog title="上传图片" :visible.sync="uploadVisible" @close="closeUploadDialog">
+      <div class="flex-row">
+        <img v-if="imgName" :src="imgUrl + imgName" class="img" />
+        <el-upload 
+          class="uploader"
+          :action="'/api/upload'"
+          :data="uploadData"
+          :show-file-list="false" 
+          :on-success="uploadSuccess"
+          :before-upload="beforeUpload">
+          <i class="el-icon-plus uploader-icon"></i>
+          <span v-if="imgName" class="upload-tips">重新上传</span>
+        </el-upload>
+      </div>
+      <span class="upload-tips">当前只能上传一张图片，大小不超过2M</span>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
+import {formatTime} from '../../../utils'
 export default {
   data() {
     return {
@@ -141,11 +188,13 @@ export default {
       compList: [],
       compFormVisible: false,
       joinFormVisible: false,
+      uploadVisible: false,
       form: {
         comp_name: '',
         organizer: '',
         level: '',
-        status: ''
+        status: '',
+        desc: ''
       },
       joinForm: {
         compId: '',
@@ -158,15 +207,22 @@ export default {
         studentId: '',
         contactInfo: ''
       },
+      uploadData: {
+        date: '',
+        comp_name: '',
+        comp_id: ''
+      },
+      imgUrl: '/static/imgs/competition/',
+      imgName: '',
       formLabelWidth: '120px',
       studentId: '201510213048'
     }
   },
   mounted() {
-    console.log('hhhh')
     this.role = this.$store.getters.role
     this._initData()
     this.getStuInfo(this.studentId)
+    this.formatDate()
   },
   methods: {
     /**
@@ -193,6 +249,8 @@ export default {
         obj.name = item.comp_name
         obj.organizer = item.organizer
         obj.level = item.level
+        obj.desc = item.desc
+        obj.imgName = item.img_name
         switch (item.status) {
           case 0:
             obj.status = '未开始'
@@ -211,6 +269,9 @@ export default {
         this.compList = dataList
         this.loading = false
       })
+    },
+    formatDate() {
+      this.uploadData.date = formatTime(new Date())
     },
     /**
      * 获取竞赛信息列表
@@ -264,11 +325,14 @@ export default {
       this.axios.post('/api/competition/info/add', this.form).then(res => {
         let data = res.data
         if (!data.status) {
-          this.$message('保存成功')
+          this.$message({
+            type: 'success',
+            message: '保存成功'
+          })
           this._initData()
           this.compFormVisible = false
         } else {
-          this.$message('保存失败')
+          this.$message.error('保存失败')
         }
       }).catch(err => {
         console.log(err)
@@ -283,13 +347,30 @@ export default {
         let data = res.data
         if (!data.status) {
           this._initData()
-          this.$message('删除成功')
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
         } else {
-          this.$message('删除失败')
+          this.$message.error('删除失败')
         }
       }).catch(err => {
         console.log(err)
       })
+    },
+    /**
+     * 打开上传图片弹窗
+     */
+    uploadFile(row) {
+      this.uploadData.comp_name = row.name
+      this.uploadData.comp_id = row._id
+      this.imgName = row.imgName
+      this.uploadVisible = true
+      console.log(this.uploadData)
+    },
+    closeUploadDialog() {
+      console.log('close')
+      this.imgName = ''
     },
     handleEdit(index, row) {
       console.log(index, row);
@@ -348,10 +429,54 @@ export default {
     joinComp(comp_name, comp_id) {
       this.joinForm.compId = comp_id
       this.joinForm.compName = comp_name
-      this.joinFormVisible = true
+      this.joinFormVisible = true 
     },
-    submitJoinForm() {
+    submitJoinForm(comp_id) {
       console.log('join')
+      let params = {
+        stuId: this.studentId,
+        compId: comp_id
+      }
+      this.axios.post('/api/competition/join', params).then( res => {
+        let data = res.data
+        if (!data.status) {
+          this.$message({
+            type: 'success',
+            message: data.msg
+          })
+        } else {
+          this.$message.error('参赛失败！请重试')
+        }
+      }).catch( err => {
+        console.log(err)
+      })
+    },
+    /**
+     * 上传成功回调
+     */
+    uploadSuccess(res, file) {
+      console.log('upload success!', res)
+      this.$message({
+        type: 'success',
+        message: res.msg
+      })
+      this.imgName = res.data.imgName
+    },
+    /**
+     * 上传前调用钩子
+     */
+    beforeUpload(file) {
+      // const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 / 1024 < 2
+      // if (!isJPG) {
+      //   this.$message.error('上传图片只能是 JPG 格式!')
+      // }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!')
+      }
+      //返回 true 时进行请求上传
+      // return isJPG && isLt2M 
+      return isLt2M 
     },
     resetDateFilter() {
       this.$refs.filterTable.clearFilter('date');
@@ -389,7 +514,11 @@ export default {
      */
     indexMethod(index) {
       return (this.currentPage - 1) * this.pageSize + index + 1
-    }
+    },
+    navTo(path) {
+      this.joinFormVisible = false
+      this.$router.push(path)
+    },
   }
 }
 </script>
@@ -398,4 +527,46 @@ export default {
 .add-comp {
   float: right;
 }
+.uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.img {
+  width: 178px;
+  height: 178px;
+  display: block;
+  margin-right: 15px;
+}
+.upload-tips {
+  display: inline-block;
+  margin-top: 15px;
+}
 </style>
+<style>
+.uploader .el-upload {
+  position: relative;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.uploader .el-upload .upload-tips {
+  position: absolute;
+  z-index: 100;
+  top: 100px;
+  left: 65px;
+  color: #999;
+  font-size: 12px;
+}
+
+.uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+</style>
+

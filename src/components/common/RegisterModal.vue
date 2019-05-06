@@ -37,9 +37,10 @@ export default {
       if (type == 'confirm') {
         let params = {
           name: this.form.name,
-          password: this.form.password
+          password: this.form.password,
+          role: 'student'
         }
-        axios.post('/api/login/createAccount', params).then(res => {
+        axios.post('/api/account/add', params).then(res => {
           if (res.data.status == 0) {
             console.log(res.data)
             this.$message(res.data.msg)

@@ -163,6 +163,6 @@ export default {
 <style scoped>
 .box-card {
   width: 600px;
-  margin: 100px 0;
+  margin: 20px 0;
 }
 </style>

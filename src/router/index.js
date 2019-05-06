@@ -41,6 +41,15 @@ export const powerRouter = [
           index: 'news',
           role: 'student',
           title: '新闻动态'
+        },
+      },
+      {
+        path: '/news/detail',
+        name: 'NewsDetail',
+        component: resolve => require(['../components/views/NewsDetail.vue'], resolve),
+        meta: {
+          index: 'news-detail',
+          role: 'student',
         }
       },
       {
@@ -51,6 +60,16 @@ export const powerRouter = [
           index: 'competition-info',
           role: 'student',
           title: '竞赛信息'
+        }
+      },
+      {
+        path: '/account-manage',
+        name: 'AccountManage',
+        component: resolve => require(['../components/views/AccountManage.vue'], resolve),
+        meta: {
+          index: 'account-manage',
+          role: 'admin',
+          title: '账户管理'
         }
       },
       {
@@ -76,28 +95,20 @@ export const powerRouter = [
           
         ]
       },
+      {
+        path: '/student/register',
+        component: resolve => require(['../components/views/StuRegister.vue'], resolve),
+        meta: {},
+      },
+      {
+        path: '/awardRecords/details',
+        component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve),
+        meta: {}
+      },
     ]
   },
   {
     path: '/login',
     component: resolve => require(['../components/views/Login.vue'], resolve)
-  },
-  {
-    path: '/student/register',
-    component: resolve => require(['../components/views/StuRegister.vue'], resolve)
-  },
-  {
-    path: '/news/detail',
-    name: 'NewsDetail',
-    component: resolve => require(['../components/views/NewsDetail.vue'], resolve),
-    meta: {
-      index: 'news-detail',
-      role: 'student',
-      title: '公告详情'
-    }
-  },
-  {
-    path: '/awardRecords/details',
-    component: resolve => require(['../components/views/AwardRecordsDetail.vue'], resolve)
   },
 ]
