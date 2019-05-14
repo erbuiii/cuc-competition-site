@@ -16,7 +16,7 @@
             <span class="more" @click="navigateTo('/news')">more</span>
           </div>
           <ul class="card-con">
-            <li class="clearfix" v-for="item in newsList" :key="item.id">
+            <li class="clearfix" v-for="item in newsList" :key="item.id" @click="navigateTo('/news/detail',{ id: item.id })">
               <span>{{item.title}}</span>
               <span class="time">{{item.createDate}}</span>  
             </li>
@@ -52,24 +52,58 @@ export default {
         require('../../assets/imgs/a2.png'),
         require('../../assets/imgs/a6.png')
       ],
-      newsList: [
-        { id: 1, title: '2019年全国大学生英语竞赛北京赛区初赛暨中国传媒大学2019年英语笔试竞赛报名通知', createDate: '2019/03/12' },
-        { id: 2, title: '关于准备举办中国传媒大学第四届中国“互联网＋”大学生创新创业大赛校内选拔赛的通知', createDate: '2018/04/02' },
-        { id: 3, title: '关于2017“外研社杯”英语阅读写作大赛线上初赛时间和地点的通知', createDate: '2017/10/11' },
-        { id: 4, title: '关于举办北京市大学生英语演讲比赛预赛的通知', createDate: '2017/09/27' },
-        { id: 5, title: '关于2017“外研社杯”全国阅读写作大赛官网信息认证的通知', createDate: '2017/09/25' },
-        { id: 6, title: '关于举办中国传媒大学第三届中国“互联网＋”大学生创新创业大赛校内选拔赛的通知', createDate: '2017/05/11' },
-        { id: 7, title: '2017年全国大学生英语竞赛初赛颁奖及经验交流会通知', createDate: '2017/04/21' },
-      ]
+      newsList: []
     }
   },
+  created() {
+    this._initNewsData()
+  },
   methods: {
+    goToDetails() {
+      
+    },
     /**
      * 路由跳转
      */
-    navigateTo(path) {
-      this.$router.push(path)
-    }
+    navigateTo(path, query) {
+      if (query) {
+        this.$router.push({
+          path: path,
+          query: query
+        })
+      } else {
+        this.$router.push(path)
+      }
+    },
+    _initNewsData() {
+      this.newsList = []
+      let params = {
+        currentPage: 1,
+        pageSize: 7
+      }
+      this.getNewsList(params)
+    },
+    getNewsList(params) {
+      this.axios.get('/api/news', { params: params }).then(response => {
+        let res = response.data
+        if (res.status == 0) {
+          let data = res.data.list
+          this.totalCount = res.data.total
+          _.forEach(data, item => {
+            let obj = {}
+            obj.id = item._id
+            obj.title = item.title
+            obj.createDate = item.create_date
+            obj.content = item.content
+            this.newsList.push(obj)
+          })
+        } else {
+          this.$message.error(res.msg)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
   }
 }
 </script>
@@ -108,9 +142,9 @@ export default {
 }
 .el-row {
   margin-bottom: 20px;
-  &:last-child {
-    margin-bottom: 0;
-  }
+}
+.el-row:last-child {
+  margin-bottom: 0;
 }
 .el-col {
   border-radius: 4px;

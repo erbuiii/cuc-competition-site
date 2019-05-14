@@ -67,7 +67,9 @@ const compInfoSchema = mongoose.Schema({
   level: String,
   status: Number,
   desc: String,
+  teacher: String,
   img_name: String,
+  apply_list: Array,
   join_stu_id: Array
 }, {collection: 'competitions_info'})
 

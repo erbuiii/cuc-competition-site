@@ -5,7 +5,7 @@
         <el-button type="primary" icon="el-icon-refresh" size="mini" circle plain @click="refresh"></el-button>
       </el-col>
       <el-col :span="3">
-        <el-button type="primary" round icon="el-icon-star-on" size="mini" @click="customQuery">自定义查询</el-button>
+        <!-- <el-button type="primary" round icon="el-icon-star-on" size="mini" @click="customQuery">自定义查询</el-button> -->
       </el-col>
       <el-col :span="6">
         <el-input size="mini" min="180px" class="search-box" v-model="queryStr" placeholder="回车发起搜索" suffix-icon="el-icon-search"
