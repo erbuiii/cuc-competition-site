@@ -6,7 +6,7 @@
     </div>
     <div class="table" id="news-table">
       <!-- <el-table :data="newsList" size="small" height="60vh" style="width: 100%;"> -->
-      <el-table :data="newsList" @row-click="navigateTo('/news/detail')" size="small" height="60vh" style="width: 100%;">
+      <el-table :data="newsList" @row-click="goToDetail" size="small" height="60vh" style="width: 100%;">
         <el-table-column prop="title" width="820"></el-table-column>
         <el-table-column prop="createDate" width="100"></el-table-column>
         <el-table-column v-if="role == 'admin'">
@@ -30,7 +30,7 @@
     </div>
 
     <!-- 新增新闻表单 -->
-    <el-dialog title="新增竞赛" :visible.sync="formVisible">
+    <el-dialog title="新增新闻" :visible.sync="formVisible" width="750px">
       <el-form :model="form">
         <el-form-item label="标题" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
@@ -39,7 +39,14 @@
           <el-date-picker v-model="form.create_date" type="date" placeholder="选择日期"></el-date-picker>
         </el-form-item>
         <el-form-item label="内容" :label-width="formLabelWidth">
-          <el-input v-model="form.content" type="textarea" :autosize="{ minRows: 2, maxRows: 10}" autocomplete="off"></el-input>
+          <!-- <el-input v-model="form.content" type="textarea" :autosize="{ minRows: 2, maxRows: 10}" autocomplete="off"></el-input> -->
+          <quill-editor 
+            v-model="form.content" 
+            ref="myQuillEditor" 
+            :options="editorOption" 
+            @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
+            @change="onEditorChange($event)">
+          </quill-editor>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -48,7 +55,6 @@
       </div>
     </el-dialog>
   </div>
-  <router-view></router-view>
 </div>
 </template>
 
@@ -77,6 +83,7 @@ export default {
       },
       formVisible: false,
       formLabelWidth: '120px',
+      editorOption: {},
     }
   },
   mounted() {
@@ -151,13 +158,26 @@ export default {
         console.log(err)
       })
     },
-    navigateTo(path) {
-      this.$router.push(path)
+    goToDetail(row) {
+      let id = row._id
+      console.log(id)
+      this.$router.push({
+        path: '/news/detail',
+        query: {
+          id: id
+        }
+      })
     },
     handleCurrentChange(val) {
       this.currentPage = val
       this._initData()
     },
+    onEditorBlur(){//失去焦点事件
+    },
+    onEditorFocus(){//获得焦点事件
+    },
+    onEditorChange(){//内容改变事件
+    }
   }
 }
 </script>

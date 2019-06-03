@@ -150,7 +150,7 @@ export default {
           _this.form.contactInfo = data.contact_info
           
         } else {
-          alert(res.msg)
+          this.$message.error(res.msg)
         }
       }).catch(err => {
         console.log(err)

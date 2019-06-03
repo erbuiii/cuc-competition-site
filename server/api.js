@@ -266,7 +266,8 @@ router.get('/api/competition/query', (req, res) => {
     {
       $or: [
         {comp_name: { $regex: reg }},
-        {organizer: { $regex: reg }}
+        {organizer: { $regex: reg }},
+        {teacher: { $regex: reg }}
       ]
     }
   )
@@ -298,13 +299,14 @@ router.get('/api/competition/query', (req, res) => {
 })
 router.post('/api/competition/info/add', (req, res) => {
   // let data = req.body
-  let { comp_name,organizer,level,status,desc } = req.body
+  let { comp_name,organizer,level,status,desc,teacher } = req.body
   let newCompInfo = new models.CompInfo({
     comp_name: comp_name,
     organizer: organizer,
     level: level,
     status: status,
     desc: desc,
+    teacher: teacher
   })
   
   newCompInfo.save((err) => {
@@ -326,20 +328,57 @@ router.post('/api/competition/info/delete', (req, res) => {
     res.send({ 'status': 0, 'msg': '删除成功' })
   })
 })
-router.post('/api/competition/join', (req, res) => {
-  let { stuId, compId } = req.body
-  models.CompInfo
-    .find({ _id: compId })
-    .lean()
-    .exec((err, docs) => {
-      if (err) {
-          res.status(500).send()
-          return
-      }
-      if (docs.length) {
-        docs.join_stu_id.push(stuId)
-        res.send({ 'status': 0, 'msg': '添加成功' })
-      }
+// 竞赛申请
+router.post('/api/competition/apply/:id', (req, res) => {
+  let compId = req.params.id
+  let { stuId, stuName } = req.body
+  let list = {
+    stu_id: stuId,
+    stu_name: stuName,
+    status: false
+  }
+  models.CompInfo.updateOne({ _id: compId }, { $addToSet: { apply_list: list } }, (err) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    } 
+    res.send({ 'status': 0, 'msg': '提交申请成功' })
+  })
+})
+// 通过申请
+router.post('/api/competition/apply/agree/:id', (req, res) => {
+  let compId = req.params.id
+  let { stuId } = req.body.params
+  models.CompInfo.updateOne({_id: compId, "apply_list.stu_id": stuId}, { $set: { "apply_list.$.status": true } }, (err, docs) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    }
+    if (docs.n && docs.nModified) {
+      res.send({ status: 0, msg: '通过审核' })
+    } else {
+      res.send({ status: -1, msg: '已通过审核' })
+    }
+  })
+})
+// 驳回申请
+router.post('/api/competition/apply/reject/:id', (req, res) => {
+  let compId = req.params.id
+  let { stuId, rejectMsg } = req.body.params
+  models.CompInfo.updateOne({_id: compId, "apply_list.stu_id": stuId}, { $set: { "apply_list.$.status": false, "apply_list.$.rejectMsg": rejectMsg } }, (err, docs) => {
+    if (err) {
+      res.status(500).send()
+      console.log(err)
+      return
+    }
+    console.log(docs)
+    if (docs.n && docs.nModified) {
+      res.send({ status: 0, msg: '驳回申请' })
+    } else {
+      res.send({ status: -1, msg: '失败' })
+    }
   })
 })
 router.post('/api/competition/info/delete', (req, res) => {
@@ -480,6 +519,24 @@ router.get('/api/news', (req, res) => {
         res.send({ 'status': -1, 'msg': '竞赛信息列表为空！'})
       }
     }) 
+  })
+})
+router.get('/api/news/:id', (req, res) => {
+  models.News.find({ _id: req.params.id }, (err, docs) => {
+    if (err) {
+      res.send(err)
+      return
+    }
+    if (docs.length) {
+      let news = docs[0]
+      res.send({ 
+        'status': 0, 
+        'msg': '',
+        'data': news
+      })
+    } else {
+      res.send({ 'status': -1, 'msg': '未找到该记录' })
+    }
   })
 })
 router.post('/api/news/add', (req, res) => {

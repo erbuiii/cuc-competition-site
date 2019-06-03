@@ -22,8 +22,9 @@
       <div class="login-btn">
         <el-button type="primary" @click="onSubmit">登录</el-button>
       </div>
-      <p class="login-tips">Tips : 用户名和密码随便填。</p>
+      <!-- <p class="login-tips">Tips : 用户名和密码随便填。</p> -->
     </el-form>
+    <img class="bg-login" src="../../assets/imgs/problem_solving.svg">
   </div>
 </template>
 
@@ -83,6 +84,7 @@ export default {
 .login-wrapper {
   width: 100%;
   height: 100vh;
+  position: relative;
 }
 .ms-title {
   width: 100%;
@@ -105,6 +107,9 @@ export default {
 .ms-content {
   width: 500px;
   padding: 30px 30px;
+  position: absolute;
+  top: 360px;
+  z-index: 100;
 }
 .login-btn {
   text-align: center;
@@ -118,5 +123,10 @@ export default {
   font-size: 12px;
   line-height: 30px;
   color: #fff;
+}
+.bg-login {
+  position: absolute;
+  width: 400px;
+  top: 80px;
 }
 </style>

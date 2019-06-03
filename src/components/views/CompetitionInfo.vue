@@ -9,7 +9,8 @@
           @keyup.enter.native="searchEnter"
         ></el-input>
       </el-col>
-      <el-button v-if="role == 'admin'" class="add-comp" type="primary" round icon="el-icon-plus" size="mini" @click="showCompForm()">新增竞赛信息</el-button>
+      <el-button v-if="role == 'teacher' || role == 'admin'" class="add-comp" type="primary" round icon="el-icon-plus" size="mini" @click="showCompForm()">新增竞赛信息</el-button>
+      <el-button v-if="role == 'teacher'" class="add-comp" type="primary" round icon="el-icon-document-checked" size="mini" @click="search(teacher)" style="margin-right:10px;">管理竞赛</el-button>
     </div>
     <div>
       <el-table :data="compList" size="small" height="60vh" style="width: 100%; max-height: 60vh;" v-loading="loading">
@@ -17,7 +18,9 @@
           <template slot-scope="scope">
             <el-form size="mini" label-width="100" v-if="scope.row.desc || scope.row.imgName" >
               <el-form-item label="竞赛详情" v-if="scope.row.desc">
-                <p>{{scope.row.desc}}</p>
+                <div v-html="scope.row.desc">
+                  {{scope.row.desc}}
+                </div>
               </el-form-item>
               <el-form-item label="获奖图片" v-if="scope.row.imgName" >
                 <img :src="imgUrl + scope.row.imgName" class="img" />
@@ -27,8 +30,9 @@
           </template>
         </el-table-column>
         <el-table-column type="index" :index="indexMethod"></el-table-column>
-        <el-table-column prop="name" label="竞赛名称" width="280"></el-table-column>
+        <el-table-column prop="name" label="竞赛名称" width="250"></el-table-column>
         <el-table-column prop="organizer" label="主办单位"></el-table-column>
+        <el-table-column prop="teacher" label="指导教师"></el-table-column>
         <el-table-column 
           prop="level" 
           label="竞赛级别"
@@ -48,20 +52,21 @@
             <el-tag v-else size="small" disable-transitions>{{scope.row.status}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240px">
+        <el-table-column label="操作" width="280px">
           <template slot-scope="scope">
-            <!-- <el-button
-              v-if="role == 'admin'"
-              size="mini"
-              @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
+            <div v-if="role == 'admin' || (role == 'teacher' && teacher == scope.row.teacher)" style="display:inline-block;margin-right:10px;">
+              <el-button
+                size="mini"
+                @click="uploadFile(scope.row)">上传附件</el-button>
+              <el-button
+                size="mini"
+                @click="applyList(scope.row)">申请列表</el-button>
+            </div>
             <el-button
-              v-if="role == 'admin' || role == 'teacher'"
-              size="mini"
-              @click="uploadFile(scope.row)">上传获奖附件</el-button>
-            <el-button
+              v-if="role == 'admin' || role == 'student'"
               size="mini"
               type="danger"
-              @click="handleOperate(scope.$index, scope.row)">{{role == 'student' ? '参加' : '删除'}}</el-button>
+              @click="handleOperate(scope.$index, scope.row, $event)">{{role == 'student' ? formatJoinText(scope.row.applyList) : '删除'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -79,7 +84,7 @@
     </div>
 
     <!-- 新增竞赛表单 -->
-    <el-dialog title="新增竞赛" :visible.sync="compFormVisible">
+    <el-dialog title="新增竞赛" :visible.sync="compFormVisible" width="750px">
       <el-form :model="form">
         <el-form-item label="竞赛名称" :label-width="formLabelWidth">
           <el-input v-model="form.comp_name" autocomplete="off"></el-input>
@@ -103,13 +108,17 @@
             <el-option label="已结束" value="3"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="指导教师" :label-width="formLabelWidth">
+          <el-input v-model="form.teacher" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="详情" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 2, maxRows: 10}"
-            placeholder="请输入竞赛详情"
-            v-model="form.desc">
-          </el-input>
+           <quill-editor 
+            v-model="form.desc" 
+            ref="myQuillEditor" 
+            :options="editorOption" 
+            @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
+            @change="onEditorChange($event)">
+          </quill-editor>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -149,12 +158,12 @@
       <div slot="footer" class="dialog-footer">
         <el-button type='text' @click="navTo('/student/register')">信息更正</el-button>
         <el-button @click="joinFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitJoinForm(joinForm.compId)">确 定</el-button>
+        <el-button type="primary" @click="submitJoinForm(joinForm)">确 定</el-button>
       </div>
     </el-dialog>
 
     <!-- 上传获奖图片 -->
-    <el-dialog title="上传图片" :visible.sync="uploadVisible" @close="closeUploadDialog">
+    <el-dialog title="上传获奖图片" :visible.sync="uploadVisible" @close="closeUploadDialog">
       <div class="flex-row">
         <img v-if="imgName" :src="imgUrl + imgName" class="img" />
         <el-upload 
@@ -170,12 +179,14 @@
       </div>
       <span class="upload-tips">当前只能上传一张图片，大小不超过2M</span>
     </el-dialog>
+    <apply-list ref="applyList" @initData="_initData"></apply-list>
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
 import {formatTime} from '../../../utils'
+import ApplyList from './ApplyList'
 export default {
   data() {
     return {
@@ -194,7 +205,8 @@ export default {
         organizer: '',
         level: '',
         status: '',
-        desc: ''
+        desc: '',
+        teacher: ''
       },
       joinForm: {
         compId: '',
@@ -215,14 +227,21 @@ export default {
       imgUrl: '/static/imgs/competition/',
       imgName: '',
       formLabelWidth: '120px',
-      studentId: '201510213048'
+      studentId: '201510213048',
+      teacher: 'teacher1',
+      editorOption: {}
     }
   },
   mounted() {
     this.role = this.$store.getters.role
+    this.form.teacher = 'teacher1'
     this._initData()
     this.getStuInfo(this.studentId)
     this.formatDate()
+  },
+  activated() {
+    console.log(this.role)
+    this._initData()
   },
   methods: {
     /**
@@ -250,7 +269,9 @@ export default {
         obj.organizer = item.organizer
         obj.level = item.level
         obj.desc = item.desc
+        obj.teacher = item.teacher
         obj.imgName = item.img_name
+        obj.applyList = item.apply_list
         switch (item.status) {
           case 0:
             obj.status = '未开始'
@@ -290,8 +311,7 @@ export default {
         console.log(err)
       })
     },
-    search() {
-      let keyword = this.queryStr
+    search(keyword) {
       let params = { 
         currentPage: this.currentPage,
         pageSize: this.pageSize,
@@ -312,7 +332,7 @@ export default {
     },
     searchEnter() {
       this.currentPage = 1
-      this.search()
+      this.search(this.queryStr)
     },
     /**
      * 新增竞赛
@@ -378,16 +398,29 @@ export default {
     /**
      * “参加” / “删除”竞赛
      */
-    handleOperate(index, row) {
+    handleOperate(index, row, event) {
+      let btnTxt = event.target.innerText
       let role = this.role
       let { _id: compId, name: compName } = row
+
       // 参加竞赛
       if (role == 'student') {
-        if (row.status == '申报中') {
-          this.joinComp(compName, compId)
+        if (btnTxt == '参加') {
+          if (row.status == '申报中') {
+            this.joinComp(compName, compId)
+          } else {
+            this.$message({
+              message: `该竞赛${row.status}`,
+              type: 'warning'
+            });
+          }
+        } else if(btnTxt == '查看驳回原因') { 
+          this.$alert(row.applyList[0].rejectMsg, '驳回原因', {
+            confirmButtonText: '确定',
+          });
         } else {
           this.$message({
-            message: `该竞赛${row.status}`,
+            message: '已申请参加该比赛',
             type: 'warning'
           });
         }
@@ -431,25 +464,47 @@ export default {
       this.joinForm.compName = comp_name
       this.joinFormVisible = true 
     },
-    submitJoinForm(comp_id) {
-      console.log('join')
+    submitJoinForm(form) {
+      console.log('join: ', form)
+      let { studentId, stuName, compId } = form
       let params = {
-        stuId: this.studentId,
-        compId: comp_id
+        stuId: studentId,
+        stuName: stuName,
       }
-      this.axios.post('/api/competition/join', params).then( res => {
+      this.axios.post(`/api/competition/apply/${compId}`, params).then( res => {
         let data = res.data
         if (!data.status) {
           this.$message({
             type: 'success',
             message: data.msg
           })
+          this._initData()
+          this.joinFormVisible = false
         } else {
-          this.$message.error('参赛失败！请重试')
+          this.$message.error('申请参赛失败！请重试')
         }
       }).catch( err => {
         console.log(err)
       })
+    },
+    formatJoinText(applyList) {
+      if(applyList.length){
+        console.log('here')
+        for (let i = 0; i < applyList.length; i++) {
+          const item = applyList[i];
+          console.log('formatJoinText: ', item)
+          if (item.stu_id == this.studentId) {
+            if (item.rejectMsg) {
+              return '查看驳回原因'
+            }
+            return item.status ? '已参加' : '审核中'
+          } else {
+            return '参加'
+          }
+        }
+      } else {
+        return '参加'
+      }
     },
     /**
      * 上传成功回调
@@ -519,6 +574,18 @@ export default {
       this.joinFormVisible = false
       this.$router.push(path)
     },
+    onEditorBlur(){//失去焦点事件
+    },
+    onEditorFocus(){//获得焦点事件
+    },
+    onEditorChange(){//内容改变事件
+    },
+    applyList(row) {
+      this.$refs.applyList.open(row)
+    }
+  },
+  components: {
+    ApplyList
   }
 }
 </script>

@@ -82,14 +82,12 @@ export default {
       this.loginStatus = false
       // 清除登录状态（游客）
       this.$store.dispatch("setUserName", '')
-      this.$store.dispatch("setRole", 'student')
+      this.$store.dispatch("setRole", '')
 
       // 游客路由
-      let powerRouterCopy = cloneObject(powerRouter)
-      console.log('after clone:', powerRouter)
-      let newchildren = powerRouterCopy[0].children.filter(route => {
+      let newchildren = powerRouter[0].children.filter(route => {
         if (route.meta) {
-          if (route.meta.role == this.$store.getters.role) {
+          if (route.meta.role !== 'admin') {
             return true
           }
           return false
@@ -97,13 +95,14 @@ export default {
           return false
         }
       });
-      let newrouter = powerRouterCopy
+      let newrouter = powerRouter
       newrouter[0].children = newchildren
       this.$router.addRoutes(newrouter) //添加动态路由
       this.$store.dispatch('setNewRouter', newrouter).then(res => {
         next({ ...to })
       }).catch(() => {})
 
+      window.location.reload()
       // 清空token
     },
     register() {
